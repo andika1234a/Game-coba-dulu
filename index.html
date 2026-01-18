@@ -3,49 +3,96 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Koleksi Game Mini</title>
+<title>Game Station Ultimate V4</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
 <style>
-/* Global Styles for App-like Feel */
+/* --- GLOBAL STYLES --- */
 body {
-  background: linear-gradient(135deg, #1f1c2c, #4a4358); /* Deep space background */
+  background: black;
   font-family: 'Inter', sans-serif;
-  color: #e5e7eb; /* Light text */
+  color: #e5e7eb;
+  overflow-x: hidden;
+  user-select: none;
 }
 
-/* General Button Enhancements */
+/* Background Animation */
+.bg-animated {
+  background: linear-gradient(-45deg, #1f1c2c, #2a0845, #4a4358, #0f172a);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+}
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* CRT Effect */
+.scanline {
+  width: 100%;
+  height: 100px;
+  z-index: 9999;
+  background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(0,0,0,0) 100%);
+  opacity: 0.1;
+  background-size: 100% 4px;
+  position: fixed;
+  pointer-events: none;
+  animation: scanline 10s linear infinite;
+}
+@keyframes scanline { from {top: -100px;} to {top: 100%;} }
+
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes pulse-fast { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+.animate-fade-in { animation: fadeIn 0.8s ease-out forwards; }
+.animate-slide-up { animation: slideUp 0.5s ease-out forwards; }
+.animate-pulse-fast { animation: pulse-fast 1s infinite; }
+.animate-glitch:hover { animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite; }
+
+/* UI Components */
 .app-button {
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
   cursor: pointer;
-  background: linear-gradient(145deg, #6366f1, #4f46e5); /* Default Indigo Gradient */
-  border: 1px solid #4338ca;
+  border: 1px solid rgba(255,255,255,0.1);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
 }
+.app-button:hover { transform: scale(1.02); box-shadow: 0 6px 12px rgba(0,0,0,0.5); filter: brightness(1.2); }
+.app-button:active { transform: scale(0.98); }
 
-.app-button:hover {
-  transform: scale(1.02);
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.6);
-}
-
-/* Card Style */
 .card {
-  background: rgba(31, 41, 55, 0.95); /* Dark Gray-800 semi-transparent */
-  border-radius: 1.5rem; /* More rounded corners */
+  background: rgba(31, 41, 55, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 1.5rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
   padding: 1.5rem;
-  border: 1px solid #4b5563;
+  border: 1px solid rgba(75, 85, 99, 0.5);
+  animation: slideUp 0.5s ease-out;
 }
 
-h1 {
-  font-family: 'Monospace', monospace;
+h1.game-title {
+  font-family: 'Courier New', monospace;
+  font-weight: 900;
   text-align: center;
-  font-size: 2.5rem;
-  color: #8b5cf6; /* Violet-500 */
-  text-shadow: 0 0 15px rgba(139, 92, 246, 0.8);
+  font-size: 3rem;
+  background: linear-gradient(to right, #a855f7, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+  margin-bottom: 1rem;
 }
 
 .card-title {
@@ -53,558 +100,426 @@ h1 {
   font-weight: bold;
   text-align: center;
   margin-bottom: 1rem;
-  color: #c4b5fd; /* Violet-300 */
+  color: #c4b5fd;
 }
 
-/* Game Specific Styles */
+/* Tic Tac Toe */
 .grid-square button {
-  background: #1f2937 !important; /* Darker square background */
+  background: #1f2937;
   border: 2px solid #4f46e5;
   transition: all 0.1s ease;
 }
+.grid-square button:hover { background-color: #374151; }
+.grid-square button:disabled { cursor: not-allowed; opacity: 0.8; }
 
-.grid-square button:hover {
-  background-color: #374151 !important;
+/* Loading Bar */
+.loading-bar-container {
+  width: 100%;
+  height: 20px;
+  background-color: #374151;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 2px solid #6366f1;
+}
+.loading-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #ec4899);
+  transition: width 0.1s linear;
 }
 
-.highlight-correct {
-  color: #4ade80; /* Green */
-  font-weight: bold;
-}
-
-/* Style for correct space character */
-.highlight-correct.space-char {
-    background-color: rgba(74, 222, 128, 0.2); /* Subtle green background */
-    border-radius: 2px;
-}
-
-.highlight-wrong {
-  color: #f87171; /* Red */
-  font-weight: bold;
-  background-color: rgba(248,113,113,0.1);
-  padding: 0 2px;
-  border-radius: 2px;
-}
-
-/* Style for wrong space character */
-.highlight-wrong.space-char {
-    background-color: rgba(248, 113, 113, 0.3); /* Clear red background for missed space */
-}
-
-.cursor-blink {
-  border-bottom: 2px solid #f97316; /* Orange cursor for contrast */
-  animation: blink 1s step-end infinite;
-}
-
-@keyframes blink {
-  0%, 50% { border-color: #f97316; }
-  50.01%, 100% { border-color: transparent; }
-}
-
-input[type=text] {
-  background: rgba(255,255,255,0.1);
-  border: 2px solid #a78bfa;
-  color: #fff;
-}
-
-input[type=text]:focus {
-  outline: none;
-  border-color: #8b5cf6;
-  box-shadow: 0 0 8px #8b5cf6;
-}
-
-/* Custom style for fruit word display */
+/* Typography for fruits */
 .fruit-letter {
-    display: inline-block;
-    width: 1.5em; /* Ensure consistent width for visual */
-    text-align: center;
-    font-family: 'Monospace', monospace;
-    font-weight: bold;
+    display: inline-block; width: 1.5em; text-align: center;
+    font-family: 'Monospace', monospace; font-weight: bold;
 }
 </style>
 </head>
-<body class="p-4 sm:p-8 flex justify-center items-start min-h-screen">
-
-<div id="root" class="w-full max-w-lg"></div>
+<body class="flex justify-center items-center min-h-screen bg-animated">
+<div class="scanline"></div>
+<div id="root" class="w-full max-w-lg p-4 sm:p-6 z-20"></div>
 
 <script type="text/babel">
 
-// --- AUDIO UTILITY ---
+// --- AUDIO UTILS ---
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = AudioContext ? new AudioContext() : null;
 
-// Helper to play a sound tone
 const playTone = (freq,dur,type='sine')=>{
   if(!audioCtx) return;
-  if(audioCtx.state==='suspended') audioCtx.resume();
-  const osc=audioCtx.createOscillator();
-  const gain=audioCtx.createGain();
-  osc.type=type; osc.frequency.setValueAtTime(freq,audioCtx.currentTime);
-  gain.gain.setValueAtTime(0,audioCtx.currentTime);
-  gain.gain.linearRampToValueAtTime(0.3,audioCtx.currentTime+0.01);
-  gain.gain.linearRampToValueAtTime(0,audioCtx.currentTime+dur);
-  osc.connect(gain); gain.connect(audioCtx.destination);
-  osc.start(); osc.stop(audioCtx.currentTime+dur);
+  // Jangan resume disini, resume harus manual via user interaction di Start Screen
+  if(audioCtx.state==='running'){
+    const osc=audioCtx.createOscillator();
+    const gain=audioCtx.createGain();
+    osc.type=type; osc.frequency.setValueAtTime(freq,audioCtx.currentTime);
+    gain.gain.setValueAtTime(0,audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.2,audioCtx.currentTime+0.01);
+    gain.gain.linearRampToValueAtTime(0,audioCtx.currentTime+dur);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime+dur);
+  }
 };
 
-// Custom App Sounds
-const playClickSound = ()=>playTone(440,0.05,'square');
-const playWinSound = ()=>[523,659,783,1046].forEach((n,i)=>setTimeout(()=>playTone(n,0.1,'triangle'),i*100));
-const playSuccessSound = ()=>[659,783].forEach((n,i)=>setTimeout(()=>playTone(n,0.05,'sine'),i*60));
-const playErrorSound = ()=>playTone(180,0.1,'sawtooth');
+// SFX Library
+const playClick = ()=>playTone(600,0.05,'square');
+const playStartSound = ()=>[440,554,659,880].forEach((n,i)=>setTimeout(()=>playTone(n,0.15,'sawtooth'),i*100));
+const playWin = ()=>[523,659,783,1046,1318].forEach((n,i)=>setTimeout(()=>playTone(n,0.1,'triangle'),i*80));
+const playError = ()=>playTone(150,0.2,'sawtooth');
+const playPing = ()=>playTone(880,0.05,'sine');
 
-// --- ABOUT/CONTACT SCREEN ---
-const AboutScreen = ({ developerEmail, developerPhone }) => (
-    <div className="card space-y-6">
-        <div className="card-title">Tentang Aplikasi & Kontak Developer</div>
-        <p className="text-gray-300">
-            Aplikasi ini adalah koleksi game mini yang dibuat untuk hiburan dan melatih kemampuan dasar seperti kecepatan mengetik dan tebak kata.
-        </p>
-        <div className="bg-gray-700/50 p-4 rounded-lg space-y-3">
-            <p className="text-lg font-bold text-indigo-300">Detail Kontak Developer:</p>
-            <div>
-                <span className="font-semibold text-gray-400">Email: </span>
-                <span className="text-yellow-300 font-mono">{developerEmail}</span>
+// --- 1. START SCREEN (PRESS START) ---
+// Tampilan Pertama: Memastikan user interaksi agar Audio/Video jalan
+const StartScreen = ({ onStart }) => {
+    return (
+        <div className="flex flex-col items-center justify-center h-screen w-full fixed inset-0 z-50 bg-black/80 backdrop-blur-sm animate-fade-in">
+            <div className="text-center space-y-8 p-6">
+                <div className="animate-bounce">
+                    <h1 className="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 filter drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
+                        GAME<br/>STATION
+                    </h1>
+                </div>
+                
+                <p className="text-gray-400 tracking-[0.5em] text-sm">ULTIMATE COLLECTION</p>
+                
+                <div className="pt-10">
+                    <button 
+                        onClick={onStart}
+                        className="animate-pulse-fast animate-glitch px-10 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-2xl rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.6)] border-2 border-indigo-400 transition-transform transform active:scale-95">
+                        PRESS START
+                    </button>
+                </div>
+                
+                <div className="absolute bottom-10 text-xs text-gray-500 w-full text-center left-0">
+                    &copy; 2026 Developer Edition
+                </div>
             </div>
-            <div>
-                <span className="font-semibold text-gray-400">Nomor Telepon: </span>
-                <span className="text-yellow-300 font-mono">{developerPhone}</span>
-            </div>
-            <p className="text-sm text-red-400 pt-2">
-                *Catatan: INI BARU V1 YA V2 SAYA TAMBAHKAN GAME SERU.
-            </p>
         </div>
-        <p className="text-sm text-gray-500">
-            Aplikasi dikembangkan menggunakan React dan Tailwind CSS.
-        </p>
+    );
+};
+
+// --- 2. INTRO VIDEO SCREEN ---
+const IntroScreen = ({ onNext }) => {
+  const videoRef = React.useRef(null);
+  
+  React.useEffect(() => {
+    // Karena user sudah klik Start sebelumnya, video PASTI autoplay dengan suara
+    if (videoRef.current) {
+        videoRef.current.play().catch((e) => console.log("Video play error", e));
+    }
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center animate-fade-in">
+        <video 
+            ref={videoRef}
+            src="https://files.catbox.moe/h5e3y2.mp4" 
+            className="w-full h-full object-contain" 
+            autoPlay 
+            playsInline 
+            // Suara aktif (muted=false) karena sudah ada interaksi user
+            muted={false}
+            onEnded={onNext}
+        />
+        <button onClick={()=>{playClick(); onNext();}} 
+            className="absolute bottom-10 right-10 px-6 py-2 bg-white/10 hover:bg-white/20 border border-white/30 text-white rounded-full text-sm backdrop-blur-md transition-all">
+            SKIP INTRO &rarr;
+        </button>
     </div>
-);
+  );
+};
 
-
-// --- TIC TAC TOE (No major changes applied here) ---
-const TicTacToeGame=()=>{
-  const [board,setBoard]=React.useState(Array(9).fill(null));
-  const [isXNext,setIsXNext]=React.useState(true);
-  const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-  
-  const calculateWinner = (b) => {
-    for(let [a,b1,c] of lines) {
-      if(b[a]&&b[a]===b[b1]&&b[a]===b[c]) return b[a];
-    }
-    return null;
-  };
-  
-  const winner=calculateWinner(board);
-  const isDraw = !winner && board.every(Boolean);
-
-  const handleClick=i=>{
-    if(board[i]||winner||isDraw) return;
-    const b=[...board]; b[i]=isXNext?'X':'O';
-    setBoard(b); 
+// --- 3. LOADING SCREEN ---
+const LoadingScreen = ({ onLoaded }) => {
+    const [progress, setProgress] = React.useState(0);
+    const [text, setText] = React.useState("Menghubungkan Server...");
     
-    // Check for winner immediately after setting board
-    if (calculateWinner(b)) {
-        playWinSound();
-    } else {
-        playClickSound();
+    const loadingTexts = [
+        "Memuat Aset Grafis...",
+        "Mengkalibrasi Joystick...",
+        "Menyiapkan Kopi Developer...",
+        "Mengunduh Data...",
+        "Hampir Siap...",
+        "STARTING ENGINE..."
+    ];
+
+    React.useEffect(() => {
+        const interval = setInterval(() => {
+            setProgress(old => {
+                const diff = Math.random() * 8; // Random jump
+                const newVal = Math.min(old + diff, 100);
+                
+                if (Math.random() > 0.8) {
+                    setText(loadingTexts[Math.floor(Math.random() * loadingTexts.length)]);
+                }
+
+                if (newVal === 100) {
+                    clearInterval(interval);
+                    setTimeout(onLoaded, 500); // Slight delay at 100%
+                }
+                return newVal;
+            });
+            playPing();
+        }, 150);
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className="fixed inset-0 z-40 bg-gray-900 flex flex-col items-center justify-center p-8">
+            <h2 className="text-3xl font-mono font-bold text-white mb-8 animate-pulse">LOADING...</h2>
+            
+            <div className="loading-bar-container w-full max-w-md">
+                <div className="loading-bar-fill" style={{ width: `${progress}%` }}></div>
+            </div>
+            
+            <div className="flex justify-between w-full max-w-md mt-2 font-mono text-sm text-green-400">
+                <span>{text}</span>
+                <span>{Math.floor(progress)}%</span>
+            </div>
+        </div>
+    );
+};
+
+// --- 4. GAMES & COMPONENTS ---
+
+// ... TicTacToeGame ...
+const TicTacToeGame = ({toMenu}) => {
+  const [step, setStep] = React.useState('menu');
+  const [mode, setMode] = React.useState(null);
+  const [difficulty, setDifficulty] = React.useState('easy'); 
+  const [board, setBoard] = React.useState(Array(9).fill(null));
+  const [isXNext, setIsXNext] = React.useState(true);
+  const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  const calculateWinner = (b) => { for (let [a, b1, c] of lines) { if (b[a] && b[a] === b[b1] && b[a] === b[c]) return b[a]; } return null; };
+  const winner = calculateWinner(board); const isDraw = !winner && board.every(Boolean);
+
+  React.useEffect(() => {
+    if (step === 'playing' && mode === 'pvc' && !isXNext && !winner && !isDraw) {
+      const timer = setTimeout(() => {
+        const emptyIndices = board.map((v, i) => v === null ? i : null).filter(v => v !== null);
+        let move = null;
+        if (difficulty === 'easy') { move = emptyIndices[Math.floor(Math.random() * emptyIndices.length)]; } else {
+          for (let i of emptyIndices) { const t = [...board]; t[i] = 'O'; if (calculateWinner(t) === 'O') { move = i; break; } }
+          if (move === null) { for (let i of emptyIndices) { const t = [...board]; t[i] = 'X'; if (calculateWinner(t) === 'X') { move = i; break; } } }
+          if (move === null && board[4] === null) move = 4;
+          if (move === null) move = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+        }
+        if (move !== null) handleMove(move);
+      }, difficulty === 'easy' ? 400 : 700);
+      return () => clearTimeout(timer);
     }
+  }, [isXNext, mode, step, winner, isDraw, board, difficulty]);
+
+  const handleMove = (i) => {
+    if (board[i] || winner || isDraw) return;
+    const b = [...board]; b[i] = isXNext ? 'X' : 'O'; setBoard(b);
+    if (calculateWinner(b)) playWin(); else playClick();
     setIsXNext(!isXNext);
   };
 
-  const Square=({v,onClick, index})=>{
+  const Square = ({ v, onClick, index }) => {
     const winningLine = winner ? lines.find(([a, b, c]) => board[a] === winner && (a === index || b === index || c === index)) : null;
-    
-    return (
-        <button onClick={onClick}
-          className={`w-full aspect-square text-6xl font-extrabold rounded-lg shadow-xl 
-            ${v==='X'?'text-red-400':'text-blue-400'} 
-            ${winningLine ? 'bg-green-700/50 scale-[1.05] shadow-green-500/50' : 'hover:bg-gray-700'}
-            transition-all duration-300`}>
-          {v}
-        </button>
-    );
+    return <button onClick={onClick} disabled={!!v || (mode === 'pvc' && !isXNext && !winner)} className={`w-full aspect-square text-5xl font-extrabold rounded-lg shadow-xl ${v === 'X' ? 'text-red-400' : 'text-blue-400'} ${winningLine ? 'bg-green-700/50 scale-105 shadow-green-500/50' : 'hover:bg-gray-700'} transition-all disabled:opacity-100`}>{v}</button>;
   };
 
-  const status = winner 
-    ? `Pemenang: ${winner} 🎉` 
-    : isDraw 
-    ? "Seri! 🤝"
-    : `Giliran: ${isXNext?'X':'O'}`;
+  if (step === 'menu') return (
+    <div className="card space-y-6 text-center animate-slide-up">
+      <div className="card-title">Pilih Mode</div>
+      <button onClick={() => { setMode('pvc'); setStep('difficulty'); playClick(); }} className="w-full py-4 bg-blue-600 rounded-xl app-button flex items-center justify-center gap-3 font-bold text-white"><span className="text-2xl">🤖</span> Vs CPU</button>
+      <button onClick={() => { setMode('pvp'); setStep('playing'); playClick(); }} className="w-full py-4 bg-purple-600 rounded-xl app-button flex items-center justify-center gap-3 font-bold text-white"><span className="text-2xl">👥</span> Vs Teman</button>
+      <button onClick={toMenu} className="text-gray-400 underline text-sm">Kembali Menu Utama</button>
+    </div>
+  );
 
-  return(
-    <div className="card space-y-6">
-      <div className="card-title text-2xl">{status}</div>
-      <div className="grid grid-cols-3 gap-3 grid-square">
-        {board.map((v,i)=><Square key={i} index={i} v={v} onClick={()=>handleClick(i)}/>)}
+  if (step === 'difficulty') return (
+    <div className="card space-y-6 text-center animate-slide-up">
+      <div className="card-title">Kesulitan</div>
+      <button onClick={() => { setDifficulty('easy'); setStep('playing'); playClick(); }} className="w-full py-4 bg-green-600 rounded-xl app-button font-bold text-white">👶 Mudah</button>
+      <button onClick={() => { setDifficulty('hard'); setStep('playing'); playClick(); }} className="w-full py-4 bg-red-600 rounded-xl app-button font-bold text-white">🔥 Sulit</button>
+      <button onClick={()=>{setStep('menu'); playClick();}} className="text-gray-400 text-sm underline pt-2">Kembali</button>
+    </div>
+  );
+
+  return (
+    <div className="card space-y-4 animate-slide-up">
+      <div className="flex justify-between items-center bg-gray-900/40 p-2 rounded-lg">
+         <div className="text-xs font-bold text-gray-300">{mode==='pvc'?`Vs CPU (${difficulty})`:'Vs Teman'}</div>
+         <button onClick={()=>{setStep('menu'); setBoard(Array(9).fill(null)); setIsXNext(true);}} className="text-xs text-red-400 hover:text-red-300 font-semibold px-2">Ganti</button>
       </div>
-      {(winner||isDraw) && 
-        <button onClick={()=>{setBoard(Array(9).fill(null)); setIsXNext(true); playClickSound();}} 
-          className="mt-4 px-4 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 w-full app-button">
-          Main Lagi
-        </button>
-      }
+      <div className="text-center text-xl font-bold text-indigo-300 min-h-[30px]">{winner ? `Pemenang: ${winner} 🎉` : isDraw ? "Seri! 🤝" : `Giliran: ${isXNext ? 'X (Kamu)' : 'O'}`}</div>
+      <div className="grid grid-cols-3 gap-2 grid-square">{board.map((v, i) => <Square key={i} index={i} v={v} onClick={() => handleMove(i)} />)}</div>
+      {(winner || isDraw) && <button onClick={()=>{setBoard(Array(9).fill(null)); setIsXNext(true); playClick();}} className="w-full py-3 bg-indigo-600 text-white rounded-xl app-button font-bold mt-2 animate-pulse">Main Lagi</button>}
     </div>
   );
 };
 
-// --- TEBAK BUAH ---
-const GuessFruitGame=()=>{
-  const fruits=["APEL","MANGGA","PISANG","JERUK","NANAS","SEMA","ALPUKAT","ANGGUR","MELON","PEPAYA","DUKU","JAMBU","RAMBUTAN","KIWI","NAGA","LEMON"];
+// ... GuessFruitGame ...
+const GuessFruitGame = ({toMenu}) => {
+  const fruits=["APEL","MANGGA","PISANG","JERUK","NANAS","SEMANGKA","ALPUKAT","ANGGUR","MELON","PEPAYA","DUKU","JAMBU","RAMBUTAN","KIWI","NAGA","LEMON"];
   const MAX_CHANCES=6;
-  const keyboardRef = React.useRef(null); 
-
-  const [word,setWord]=React.useState('');
-  const [guessed,setGuessed]=React.useState([]);
-  const [chance,setChance]=React.useState(MAX_CHANCES);
-  const [gameStatus,setGameStatus]=React.useState('');
-  const [isGameOver,setIsGameOver]=React.useState(false);
-
-  const startGame=React.useCallback(()=>{
-    const w=fruits[Math.floor(Math.random()*fruits.length)];
-    // REVEAL THE FIRST LETTER automatically
-    const initialGuess = [w[0]]; 
-    
-    setWord(w);
-    setGuessed(initialGuess); // Set initial guess to the first letter
-    setChance(MAX_CHANCES);
-    setGameStatus(`Permainan dimulai! Tebak buah ${w.length} huruf.`);
-    setIsGameOver(false);
-    playClickSound();
-  },[]);
-
+  const [word,setWord]=React.useState(''); const [guessed,setGuessed]=React.useState([]); const [chance,setChance]=React.useState(MAX_CHANCES); const [isGameOver,setIsGameOver]=React.useState(false);
+  const startGame=React.useCallback(()=>{ const w=fruits[Math.floor(Math.random()*fruits.length)]; setWord(w); setGuessed([w[0]]); setChance(MAX_CHANCES); setIsGameOver(false); playClick(); },[]);
   React.useEffect(()=>{startGame();},[startGame]);
 
   const handleGuess=l=>{
-    const lUpper = l.toUpperCase();
-    
-    // Check if the letter is already guessed, or if it's the first letter (which is automatically revealed)
-    if(isGameOver || !/[A-Z]/.test(lUpper) || guessed.includes(lUpper)) return;
-    
-    const newGuess=[...guessed,lUpper];
-    setGuessed(newGuess);
-    
-    if(!word.includes(lUpper)) {
-        setChance(c=>{
-            const newChance = c-1;
-            if(newChance <= 0) {
-                setIsGameOver(true);
-                playErrorSound();
-            } else {
-                playErrorSound();
-            }
-            return newChance;
-        });
-    } else {
-        playSuccessSound();
-        const display=word.split('').map(c=>newGuess.includes(c)?c:'_').join('');
-        if(!display.includes('_')) {
-            setIsGameOver(true);
-            playWinSound();
-        }
-    }
+    if(isGameOver||guessed.includes(l)) return;
+    const n=[...guessed,l]; setGuessed(n);
+    if(!word.includes(l)){ setChance(c=>{const nc=c-1; if(nc<=0){setIsGameOver(true); playError();}else playError(); return nc;}); } 
+    else { playClick(); if(word.split('').every(c=>n.includes(c))){ setIsGameOver(true); playWin(); } }
   };
 
-  // Keyboard Listener
-  React.useEffect(() => {
-    const handleKeyDown = (e) => {
-        if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
-            handleGuess(e.key.toUpperCase());
-        }
-    };
-    
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-        document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [guessed, isGameOver, word]); 
-
-  React.useEffect(()=>{
-    if(!word) return;
-    const display=word.split('').map(c=>guessed.includes(c)?c:'_').join('');
-    
-    if(isGameOver){
-        setGameStatus(chance<=0 ? `Kalah! Buah: ${word} 😞` : `Menang! Buah: ${word} 🥳`);
-    } else {
-        setGameStatus(`Tebak huruf. Sisa kesempatan: ${chance}`);
-    }
-  },[guessed,chance,word,isGameOver]);
-
-  const renderedWord=React.useMemo(()=>word.split('').map((c, i)=>(
-    <span key={i} className="fruit-letter text-6xl mx-1 pb-1 border-b-4 border-dashed border-gray-500 text-yellow-300">
-        {guessed.includes(c)?c:'_'}
-    </span>
-  )),[word,guessed]);
-
-  return(
-    <div className="card space-y-6" ref={keyboardRef} tabIndex={-1}>
+  return (
+    <div className="card space-y-6 text-center animate-slide-up">
       <div className="card-title">Tebak Buah 🍉</div>
-      
-      {/* Clue Display, showing the revealed first letter */}
-      <p className="text-center text-sm text-gray-400 font-bold p-2 bg-gray-900/50 rounded-lg">
-        Clue: Kategori Buah ({word.length} huruf). Dimulai dengan: <span className="text-yellow-400 text-lg">{word ? word[0] : '...'}</span>
-      </p>
-
-      {/* Visual Hangman/Chances */}
-      <div className="text-center text-3xl text-red-400 font-semibold mb-4">
-        {Array(MAX_CHANCES).fill().map((_, i) => (
-            <span key={i} className={`mx-1 transition-opacity duration-500 ${i < chance ? 'opacity-100' : 'opacity-30'}`}>❤️</span>
-        ))}
+      <div className="text-sm text-gray-400">Petunjuk: {word.length} Huruf (Awal: {word[0]})</div>
+      <div className="text-2xl text-red-400">{Array(MAX_CHANCES).fill().map((_,i)=><span key={i} className={i<chance?'opacity-100':'opacity-20'}>❤️</span>)}</div>
+      <div className="my-4">{word.split('').map((c,i)=><span key={i} className="fruit-letter text-3xl mx-1 border-b-2 border-gray-500 text-yellow-300">{guessed.includes(c)?c:'_'}</span>)}</div>
+      <div className="flex flex-wrap justify-center gap-1">{'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(l=><button key={l} onClick={()=>handleGuess(l)} disabled={guessed.includes(l)||isGameOver} className={`w-8 h-10 rounded font-bold ${guessed.includes(l)?(word.includes(l)?'bg-green-600 opacity-50':'bg-red-600 opacity-50'):'bg-gray-700 hover:bg-gray-600 text-white'}`}>{l}</button>)}</div>
+      {isGameOver && <div className={`p-3 rounded font-bold ${chance>0?'text-green-400':'text-red-400'}`}>{chance>0?'MENANG! 🥳':'YAH KALAH! Jawabannya: '+word}</div>}
+      <div className="flex gap-2">
+         <button onClick={startGame} className="flex-1 py-3 bg-purple-600 text-white rounded-xl app-button">Reset</button>
+         <button onClick={toMenu} className="px-4 py-3 bg-gray-600 text-white rounded-xl app-button">Menu</button>
       </div>
-      
-      <div className="text-center my-4">{renderedWord}</div>
-      <p className="text-center font-bold text-lg text-gray-400">Tekan tombol huruf pada keyboard atau klik di bawah ini.</p>
-      
-      <div className="flex flex-wrap justify-center gap-1 sm:gap-2">
-        {'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(l=>{
-          const isGuessed=guessed.includes(l);
-          const isCorrect = isGuessed && word.includes(l);
-          const isWrong = isGuessed && !word.includes(l);
-          
-          let btnClass = 'bg-gray-700 text-white hover:bg-gray-600';
-          if(isCorrect) btnClass = 'bg-green-600 text-white opacity-80';
-          if(isWrong) btnClass = 'bg-red-600 text-white opacity-80';
-
-          return <button key={l} onClick={()=>handleGuess(l)} 
-            className={`px-3 py-1 rounded-lg font-bold shadow-md text-lg transition-all ${btnClass}`} 
-            disabled={isGuessed||isGameOver}>{l}</button>
-        })}
-      </div>
-      
-      <p className="text-center font-bold text-lg p-2 rounded-lg bg-gray-700/50">{gameStatus}</p>
-      
-      <button onClick={startGame} className="mt-4 px-4 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 w-full app-button">
-        Mulai Baru
-      </button>
     </div>
   );
 };
 
-// --- TANTANGAN MENGETIK CEPAT ---
-const TypingChallengeGame=()=>{
-  const phrases=[
-    "Saya suka bermain game di waktu luang",
-    "Kecerdasan buatan semakin berkembang pesat",
-    "Pagi hari adalah waktu yang tepat untuk berolahraga",
-    "Indonesia memiliki banyak sekali pulau yang indah",
-    "Menulis kode adalah hobi yang menyenangkan dan menantang",
-    "Belajar bahasa baru membuka jendela dunia",
-    "Pemanasan global adalah isu penting yang harus kita hadapi",
-    "Sepeda motor melaju kencang di jalanan ibu kota",
-    "Langit biru hari ini terlihat sangat cerah dan damai",
-    "Model bahasa besar mampu menghasilkan teks yang koheren",
-    "Pengembangan web kini fokus pada pengalaman seluler"
-  ];
-  const [current,setCurrent]=React.useState('');
-  const [typed,setTyped]=React.useState('');
-  const [status,setStatus]=React.useState('idle'); // idle, running, finished
-  const [startTime,setStartTime]=React.useState(0);
-  const [duration,setDuration]=React.useState(0);
-  const [wpm,setWpm]=React.useState(0);
-  const inputRef=React.useRef(null);
+// ... TypingGame ...
+const TypingChallengeGame = ({toMenu}) => {
+  const phrases=["Coding itu asik","Belajar React seru","Kopi hitam nikmat","Pagi hari cerah","Makan nasi goreng","Keyboard mekanikal","Layar komputer jernih","Koneksi internet cepat"];
+  const [target,setTarget]=React.useState(''); const [input,setInput]=React.useState(''); const [start,setStart]=React.useState(0); const [done,setDone]=React.useState(false); const [wpm,setWpm]=React.useState(0);
+  const init=()=>{ setTarget(phrases[Math.floor(Math.random()*phrases.length)]); setInput(''); setDone(false); setWpm(0); setStart(0); playClick(); };
+  React.useEffect(init,[]);
 
-  const startGame=React.useCallback(()=>{
-    const p=phrases[Math.floor(Math.random()*phrases.length)];
-    setCurrent(p); setTyped(''); setStatus('idle'); setDuration(0); setWpm(0); setStartTime(0);
-    playClickSound();
-    setTimeout(() => inputRef.current?.focus(), 100); 
-  },[]);
-
-  React.useEffect(()=>{startGame();},[startGame]);
-
-  // Timer effect
-  React.useEffect(()=>{
-    if(status==='running'){
-      const timer=setInterval(()=>{
-        const elapsed=Math.floor((Date.now()-startTime)/1000);
-        setDuration(elapsed);
-        const correctChars=typed.split('').filter((c,i)=>c===current[i]).length;
-        setWpm(Math.round((correctChars/5)/(elapsed/60||1)));
-      },1000);
-      return ()=>clearInterval(timer);
-    }
-  },[status,typed,startTime,current]);
-
-  const handleTyping=e=>{
-    const val=e.target.value;
-    
-    // 1. Game Start Logic
-    if(status==='idle' && val.length > 0){
-        setStatus('running'); 
-        setStartTime(Date.now());
-    }
-
-    if(status==='running'){
-        const newTyped = val;
-        
-        // 2. Sound Feedback for new character (key press)
-        if(newTyped.length > typed.length){ 
-            const lastTypedChar = newTyped.slice(-1);
-            const expectedChar = current[newTyped.length-1];
-            
-            if(lastTypedChar === expectedChar) {
-              playSuccessSound();
-            } else {
-              playErrorSound();
-            }
-        }
-        
-        // 3. Update state
-        setTyped(newTyped);
-        
-        // 4. Game Finish Check
-        if(newTyped.length >= current.length){
-            setStatus('finished'); 
-            const finalDuration = Math.floor((Date.now() - startTime) / 1000);
-            setDuration(finalDuration);
-
-            const correctChars = newTyped.split('').filter((c,i)=>c===current[i]).length;
-            setWpm(Math.round((correctChars/5)/(finalDuration/60||1)));
-
-            const accuracy = (correctChars/current.length)*100;
-            if(accuracy > 90) playWinSound();
-        }
-    }
+  const handleChange=e=>{
+    const v=e.target.value; if(!start) setStart(Date.now()); setInput(v);
+    if(v===target){ setDone(true); const s=(Date.now()-start)/1000; setWpm(Math.round((target.length/5)/(s/60))); playWin(); } 
+    else if(v.length>input.length) { v[v.length-1]===target[v.length-1]?playClick():playError(); }
   };
 
-  const renderPhrase=React.useMemo(()=>current.split('').map((c,i)=>{
-    let colorClass = '';
-    const isSpace = c === ' ';
-    let extraClass = isSpace ? 'space-char' : '';
-    
-    // Color previous characters
-    if (i < typed.length) {
-      colorClass = c === typed[i] ? 'highlight-correct' : 'highlight-wrong';
-    }
-
-    // Add cursor to the current position if running
-    const isCursor = status === 'running' && i === typed.length;
-    const cursorClass = isCursor ? ' cursor-blink' : '';
-    
-    // Use non-breaking space if it's a space character to ensure its width is preserved when styled
-    const displayChar = isSpace ? '\u00A0' : c; 
-
-    return <span key={i} className={`text-2xl ${colorClass} ${extraClass}${cursorClass}`}>{displayChar}</span>
-  }),[current, typed, status]);
-
-  const correctCharsCount=typed.split('').filter((c,i)=>c===current[i]).length;
-  const accuracy=typed.length===0?100:Math.round((correctCharsCount/typed.length)*100);
-
-  return(
-    <div className="card space-y-6">
-      <div className="card-title">Tantangan Mengetik Cepat ⌨️</div>
-      <div className="p-4 rounded-xl bg-gray-800 border-2 border-indigo-400 min-h-[100px] flex flex-wrap content-start">
-        {renderPhrase}
+  return (
+    <div className="card space-y-6 animate-slide-up">
+      <div className="card-title">Typing Speed ⚡️</div>
+      <div className="p-4 bg-gray-800 rounded-lg text-xl font-mono border-l-4 border-indigo-500">{target.split('').map((c,i)=><span key={i} className={i<input.length?(input[i]===c?'text-green-400':'text-red-400'):'text-gray-500'}>{c}</span>)}</div>
+      <input type="text" value={input} onChange={handleChange} disabled={done} autoFocus className="w-full p-3 bg-gray-900 border border-indigo-500 rounded-lg text-white" placeholder="Ketik disini..." />
+      {done && <div className="text-center text-green-400 font-bold text-xl animate-bounce">Kecepatan: {wpm} WPM</div>}
+      <div className="flex gap-2">
+         <button onClick={init} className="flex-1 py-3 bg-purple-600 text-white rounded-xl app-button">Ulangi</button>
+         <button onClick={toMenu} className="px-4 py-3 bg-gray-600 text-white rounded-xl app-button">Menu</button>
       </div>
-      
-      <input ref={inputRef} type="text" value={typed} onChange={handleTyping} disabled={status==='finished'} 
-        placeholder={status==='idle'?'Tekan tombol apa saja untuk mulai mengetik...':(status==='finished'?'Selesai!':`Terus mengetik... (${current.length - typed.length} tersisa)`)}
-        className="w-full p-3 text-xl rounded-lg shadow-inner disabled:bg-gray-700 transition-colors duration-200"/>
-      
-      <div className="grid grid-cols-3 gap-3 text-center bg-gray-700/50 p-3 rounded-lg font-mono">
-        <div className="text-yellow-300">
-            <div className="text-sm font-light">WPM</div>
-            <div className="text-2xl font-bold">{wpm}</div>
-        </div>
-        <div className="text-indigo-300">
-            <div className="text-sm font-light">WAKTU (s)</div>
-            <div className="text-2xl font-bold">{duration}</div>
-        </div>
-        <div className="text-green-300">
-            <div className="text-sm font-light">AKURASI (%)</div>
-            <div className="text-2xl font-bold">{accuracy}</div>
-        </div>
-      </div>
-      
-      {status==='finished' && <div className={`p-3 rounded-xl text-center font-extrabold text-white ${accuracy > 90 ? 'bg-green-600 shadow-lg shadow-green-500/50' : 'bg-red-600 shadow-lg shadow-red-500/50'}`}>
-          {accuracy > 90 ? 'PERFORMA LUAR BIASA! 🌟' : 'TANTANGAN SELESAI!'}
-      </div>}
-      
-      <button onClick={startGame} className="mt-4 px-4 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 w-full app-button">
-        Mulai Ulang
-      </button>
     </div>
   );
 };
 
-// --- APP ---
-const App=()=>{
-  const BGM_URL='https://files.catbox.moe/3q0ras.mp3'; 
-  const [mode,setMode]=React.useState('home');
-  const [isBgmEnabled,setIsBgmEnabled]=React.useState(false);
-  const audioRef=React.useRef(null);
-  const [isReady, setIsReady] = React.useState(false);
-  
-  // Placeholder contact information
-  const myDeveloperEmail = "iwayanandikaputra11@gmail.com"; 
-  const myDeveloperPhone = "+6281946499317";
+// ... About Screen ...
+const AboutScreen = ({ toMenu, developerEmail, developerPhone }) => (
+    <div className="card space-y-6 animate-slide-up">
+        <div className="card-title">Tentang Developer</div>
+        <div className="bg-gray-800 p-4 rounded-xl space-y-3 border border-gray-600">
+            <div className="flex flex-col"><span className="text-gray-400 text-xs">Email</span><span className="text-yellow-300 font-mono text-sm">{developerEmail}</span></div>
+            <div className="flex flex-col"><span className="text-gray-400 text-xs">Phone</span><span className="text-yellow-300 font-mono text-sm">{developerPhone}</span></div>
+        </div>
+        <button onClick={toMenu} className="w-full py-3 bg-gray-600 text-white rounded-xl app-button">Kembali ke Menu</button>
+    </div>
+);
 
-  // Initialize Audio
+// --- MAIN APP (UPDATED FLOW) ---
+const App = () => {
+  // URUTAN STATE: 'start' -> 'intro' -> 'loading' -> 'home'
+  const [appState, setAppState] = React.useState('start'); 
+  const [activeGame, setActiveGame] = React.useState(null); 
+  const [bgm, setBgm] = React.useState(false);
+  const audioRef = React.useRef(null);
+  
+  const myDeveloperEmail = "iwayanandikaputra11@gmail.com"; 
+  const myDeveloperPhone = "6285923596743";
+
   React.useEffect(()=>{
-    if(!audioRef.current){
-        const audio=new Audio(BGM_URL); 
-        audio.loop=true; 
-        audio.volume=0.15; 
-        audioRef.current=audio;
-    }
-    setIsReady(true);
+    audioRef.current = new Audio('https://files.catbox.moe/yqzhnl.mp3');
+    audioRef.current.loop = true;
+    audioRef.current.volume = 0.3;
   },[]);
 
-  // BGM Control
+  // BGM Logic: Hanya nyala di 'home' atau saat main game
   React.useEffect(()=>{
-    const audio=audioRef.current;
-    if(!audio || !isReady) return;
-    
-    if(isBgmEnabled && mode !== 'home'){
-        audio.play().catch(e => console.log("Audio play failed, user interaction needed.", e));
+    if(!audioRef.current) return;
+    if(bgm && (appState === 'home' || activeGame)) {
+        audioRef.current.play().catch(()=>{});
     } else {
-        audio.pause();
+        audioRef.current.pause();
     }
-  },[isBgmEnabled, mode, isReady]);
+  },[bgm, appState, activeGame]);
+
+  // --- TRANSITION HANDLERS ---
   
-  const handleModeChange = (newMode) => {
-      setMode(newMode);
-      playClickSound();
+  // 1. Klik PRESS START (Mengaktifkan Audio Context & Masuk Intro)
+  const handleStartClicked = () => {
+      // Ini bagian PENTING: Resume audio context saat user klik
+      if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      playStartSound(); 
+      setAppState('intro'); 
+  };
+
+  // 2. Video Selesai (Masuk Loading)
+  const handleIntroDone = () => {
+      setAppState('loading');
+  };
+  
+  // 3. Loading Selesai (Masuk Menu & Nyalakan BGM)
+  const handleLoadingDone = () => {
+      setAppState('home');
+      setBgm(true);
   }
 
-  return(
-    <div className="w-full max-w-lg space-y-8">
-      <h1>Koleksi Game Mini 🎮</h1>
-      
-      {mode==='home' && <div className="card space-y-4">
-        <h2 className="card-title">Pilih Permainan</h2>
-        <button onClick={()=>handleModeChange('tictactoe')} className="w-full py-4 text-white rounded-xl app-button bg-indigo-500 flex items-center justify-center space-x-3">
-          <span className="text-2xl">❌⭕</span> <span>Tik Tak Tuk</span>
-        </button>
-        <button onClick={()=>handleModeChange('guessfruit')} className="w-full py-4 text-white rounded-xl app-button bg-yellow-500 flex items-center justify-center space-x-3" style={{ background: 'linear-gradient(145deg, #f59e0b, #d97706)' }}>
-          <span className="text-2xl">🍉❓</span> <span>Tebak Buah</span>
-        </button>
-        <button onClick={()=>handleModeChange('typingchallenge')} className="w-full py-4 text-white rounded-xl app-button bg-green-500 flex items-center justify-center space-x-3" style={{ background: 'linear-gradient(145deg, #10b981, #059669)' }}>
-          <span className="text-2xl">⚡️📝</span> <span>Tantangan Mengetik Cepat</span>
-        </button>
+  const enterGame = (gameName) => setActiveGame(gameName);
+  const backToMenu = () => { setActiveGame(null); playClick(); };
 
-        {/* NEW: About/Contact Button */}
-        <button onClick={()=>handleModeChange('about')} className="w-full py-3 text-white rounded-xl app-button bg-gray-600 flex items-center justify-center space-x-3" style={{ background: 'linear-gradient(145deg, #4b5563, #374151)' }}>
-          <span className="text-xl">ℹ️</span> <span>Tentang & Kontak</span>
-        </button>
-        
-        <button onClick={()=>setIsBgmEnabled(!isBgmEnabled)} className="w-full py-3 mt-4 text-white rounded-xl app-button" style={{ background: isBgmEnabled ? 'linear-gradient(145deg, #ec4899, #db2777)' : 'linear-gradient(145deg, #a855f7, #9333ea)' }}>
-          {isBgmEnabled?'Matikan BGM 🔇':'Nyalakan BGM 🎶'}
-        </button>
-      </div>}
+  // --- RENDER VIEWS ---
+  
+  // View 1: Start Screen
+  if (appState === 'start') return <StartScreen onStart={handleStartClicked} />;
+  
+  // View 2: Intro Video
+  if (appState === 'intro') return <IntroScreen onNext={handleIntroDone} />;
+  
+  // View 3: Loading Screen
+  if (appState === 'loading') return <LoadingScreen onLoaded={handleLoadingDone} />;
+
+  // View 4: Main Menu & Games
+  return (
+    <div className="w-full space-y-8 animate-fade-in">
+      <h1 className="game-title">GAME STATION</h1>
       
-      {mode!=='home' && 
-        <button onClick={()=>handleModeChange('home')} className="text-indigo-300 hover:text-indigo-400 underline text-lg font-semibold flex items-center space-x-2">
-          <span className="text-2xl">&larr;</span> <span>Kembali ke Menu Utama</span>
-        </button>
-      }
-      
-      <div className="pb-8">
-        {mode==='tictactoe' && <TicTacToeGame/>}
-        {mode==='guessfruit' && <GuessFruitGame/>}
-        {mode==='typingchallenge' && <TypingChallengeGame/>}
-        {mode==='about' && <AboutScreen developerEmail={myDeveloperEmail} developerPhone={myDeveloperPhone} />} 
-      </div>
+      {!activeGame && (
+          <div className="card space-y-4">
+            <h2 className="card-title text-gray-300">PILIH PERMAINAN</h2>
+            
+            <button onClick={()=>{enterGame('tictactoe'); playClick();}} 
+                className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl app-button text-white font-bold text-lg flex items-center justify-center gap-3">
+                ❌⭕ Tic Tac Toe
+            </button>
+            
+            <button onClick={()=>{enterGame('fruit'); playClick();}} 
+                className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl app-button text-white font-bold text-lg flex items-center justify-center gap-3">
+                🍉 Tebak Buah
+            </button>
+            
+            <button onClick={()=>{enterGame('typing'); playClick();}} 
+                className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl app-button text-white font-bold text-lg flex items-center justify-center gap-3">
+                ⌨️ Typing Speed
+            </button>
+
+            <div className="flex gap-2 mt-4">
+                <button onClick={()=>{enterGame('about'); playClick();}} className="flex-1 py-3 bg-gray-600 rounded-xl app-button text-white text-sm">ℹ️ Kontak</button>
+                <button onClick={()=>setBgm(!bgm)} className={`flex-1 py-3 rounded-xl app-button text-white text-sm ${bgm?'bg-pink-600':'bg-gray-700'}`}>
+                    {bgm?'Musik: ON 🔊':'Musik: OFF 🔇'}
+                </button>
+            </div>
+          </div>
+      )}
+
+      {activeGame === 'tictactoe' && <TicTacToeGame toMenu={backToMenu}/>}
+      {activeGame === 'fruit' && <GuessFruitGame toMenu={backToMenu}/>}
+      {activeGame === 'typing' && <TypingChallengeGame toMenu={backToMenu}/>}
+      {activeGame === 'about' && <AboutScreen toMenu={backToMenu} developerEmail={myDeveloperEmail} developerPhone={myDeveloperPhone} />}
     </div>
   );
 };
@@ -614,4 +529,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
 </script>
 </body>
 </html>
+
 
